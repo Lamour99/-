@@ -17,3 +17,42 @@
    3.加密完成就生成一个signature，和微信发送过来的进行对比
      -如果一样，说明消息来自于微信服务器，返回echostr给微信服务器
      -如果不一样，说明不是微信服务器发送的消息，返回error
+
+2.cheapter02
+模块化模块化验证服务器有效性
+
+3.cheapter03
+FetchAccessToken方法
+/*
+  获取access_token：
+  是什么？ 微信调用接口全局唯一凭据
+  
+  特点
+   1、唯一的
+   2、有效期为2小时，提前5分钟请求
+   3、接口权限 每天2000次
+  
+  https请求方式: GET https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=APPID&secret=APPSECRET
+  
+  
+  设计思路：
+   1、首次本地没有，发送请求获取access_token，保存下来（本地文件）
+   2、第二次或以后：
+      -先去本地读取文件，判断它是否过期
+       -过期了
+       -重新请求获取access_token，保存下来覆盖之前的文件（保证文件是唯一的）
+       -没有过期
+        -直接使用
+  
+  整理思路：
+   读取本地文件
+       -本地有文件（readAccessToken）
+       -判断它是否过期 （isValidAccessToken）
+       -过期了
+          -重新请求获取access_token（getAccessToken），保存下来覆盖之前的文件（保证文件是唯一的）（saveAccessToken）
+       -没有过期
+          -直接使用
+      -本地没有文件
+       -发送请求获取access_token（getAccessToken），保存下来（本地文件）（saveAccessToken）
+      
+ 
