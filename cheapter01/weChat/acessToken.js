@@ -40,7 +40,6 @@ const { writeFile, readFile} = require('fs')
 
 // 引入config模块
 const {appID, appsecret} = require('../config')
-const { resolve } = require('path')
 
 
 
