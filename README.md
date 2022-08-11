@@ -54,5 +54,7 @@ FetchAccessToken方法
           -直接使用
       -本地没有文件
        -发送请求获取access_token（getAccessToken），保存下来（本地文件）（saveAccessToken）
-      
+
+4.cheapter04
+   接收用户发送过来的信息
  

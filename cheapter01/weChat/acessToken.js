@@ -141,9 +141,62 @@ class Wechat{
         //     return true
         // }
         return  data.expires_in > Date.now()
-
-
      }
+
+     /**
+      * 用来获取没有过期的access_token
+      * @return {Promise<any>} access_token
+      */
+     fetchAccessToken () {
+        // 优化
+        if(this.access_token && this.expires_in && this.isValidAccessToken(this)){
+            // 说明之前保存过access_token，并且它是有效的，直接使用
+            return Promise.resolve({
+                access_token:this.access_token,
+                expires_in:this.expires_in
+            })
+        }
+
+        //是fetchAccessToken函数的返回值
+        return this.readAccessToken()
+        .then(async res =>{
+            //本地有文件
+            //判断它是否过期
+            if(this.isValidAccessToken(res)){
+                //有效的
+                // resolve(res)
+                return Promise.resolve(res)
+            }else{
+                //过期了
+                //发送请求获取access_token(getAccessToken)
+               const res = await this.getAccessToken()
+               // 保存下来（本地文件）（saveAccessToken），直接使用
+               await this.saveAccessToken(res)
+               //将请求回来的access_token返回出去
+            //    resolve(res)
+            return Promise.resolve(res)
+            }
+        })
+        .catch(async err =>{
+            //本地没有文件
+              const res = await this.getAccessToken()
+              // 保存下来（本地文件）（saveAccessToken），直接使用
+              await this.saveAccessToken(res)
+              //将请求回来的access_token返回出去
+            //   resolve(res)
+            return Promise.resolve(res)
+        })
+        .then(res =>{
+            //将access_token挂载到this上
+            this.access_token = res.access_token
+            this.expires_in = res.expires_in
+            // 返回res包装了一层promise对象（此对象为成功的状态）
+            // 是this.readAceessToken()最终的返回值
+            return Promise.resolve(res)
+        })
+     }
+
+
 }
 
 
@@ -161,39 +214,44 @@ const w = new Wechat();
 //           -直接使用
 //       -本地没有文件
 //        -发送请求获取access_token（getAccessToken），保存下来（本地文件）（saveAccessToken）
-new Promise((resolve,reject) =>{
-    w.readAccessToken()
-    .then(res =>{
-        //本地有文件
-        //判断它是否过期
-        if(w.isValidAccessToken(res)){
-            //有效的
-            resolve(res)
-        }else{
-            //过期了
-            //发送请求获取access_token(getAccessToken)
-            w.getAccessToken()
-            .then(res =>{
-                // 保存下来（本地文件）（saveAccessToken），直接使用
-                w.saveAccessToken(res)
-                 .then(() =>{
-                    resolve(res)
-                 })
-            })
-        }
-    })
-    .catch(err =>{
-        //本地没有文件
-        w.getAccessToken()
-        .then(res =>{
-            // 保存下来（本地文件）（saveAccessToken），直接使用
-            w.saveAccessToken(res)
-             .then(() =>{
-                resolve(res)
-             })
-        })
-    })
-})
-  .then(res =>{
+// new Promise((resolve,reject) =>{
+//     w.readAccessToken()
+//     .then(res =>{
+//         //本地有文件
+//         //判断它是否过期
+//         if(w.isValidAccessToken(res)){
+//             //有效的
+//             resolve(res)
+//         }else{
+//             //过期了
+//             //发送请求获取access_token(getAccessToken)
+//             w.getAccessToken()
+//             .then(res =>{
+//                 // 保存下来（本地文件）（saveAccessToken），直接使用
+//                 w.saveAccessToken(res)
+//                  .then(() =>{
+//                     resolve(res)
+//                  })
+//             })
+//         }
+//     })
+//     .catch(err =>{
+//         //本地没有文件
+//         w.getAccessToken()
+//         .then(res =>{
+//             // 保存下来（本地文件）（saveAccessToken），直接使用
+//             w.saveAccessToken(res)
+//              .then(() =>{
+//                 resolve(res)
+//              })
+//         })
+//     })
+// })
+//   .then(res =>{
+//     console.log(res);
+//   })
+w.fetchAccessToken ()
+.then(res =>{
     console.log(res);
-  })
+    console.log(1111);
+})
